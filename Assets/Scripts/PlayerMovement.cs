@@ -3,10 +3,11 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public GameObject Floor;
+    private Vector3 respawnPoint;
 
     [Header("Movement")]
     private float moveSpeed; //esta variable es la que determina y guarda el movimiento siendo modificada por el resto
-    public float walkSpeed; 
+    public float walkSpeed;
     public float sprintSpeed;
     public float wallrunSpeed;
 
@@ -53,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
     {
         playerRb = GetComponent<Rigidbody>();
         playerRb.freezeRotation = true;
+        respawnPoint = transform.position;
 
     }
     void Update()
@@ -94,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
             moveSpeed = wallrunSpeed;
         }
 
-        if(grounded && Input.GetKey(sprintKey)) //Sprinteando
+        if (grounded && Input.GetKey(sprintKey)) //Sprinteando
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
@@ -120,27 +122,27 @@ public class PlayerMovement : MonoBehaviour
 
         if (Onslope() && !exitingSlope)
         {
-            playerRb.AddForce(GetSlopeDirection()* moveSpeed * 20f, ForceMode.Force);
+            playerRb.AddForce(GetSlopeDirection() * moveSpeed * 20f, ForceMode.Force);
 
             if (playerRb.velocity.y > 0)
                 playerRb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
 
         if (grounded) //cuando estoy en el suelo
-        playerRb.AddForce(Direction.normalized * moveSpeed * 5f, ForceMode.Force); 
-        
+            playerRb.AddForce(Direction.normalized * moveSpeed * 5f, ForceMode.Force);
+
         else if (!grounded) //cuando no estoy en el suelo
-        playerRb.AddForce(Direction.normalized * moveSpeed * 5f * airMultiplier, ForceMode.Force); 
+            playerRb.AddForce(Direction.normalized * moveSpeed * 5f * airMultiplier, ForceMode.Force);
 
         playerRb.useGravity = !Onslope();
 
     }
     void SpeedControl()
-    {   
+    {
         //limitar la velocidad en cuando hay 
         if (Onslope())
         {
-            if(playerRb.velocity.magnitude > moveSpeed)
+            if (playerRb.velocity.magnitude > moveSpeed)
                 playerRb.velocity = playerRb.velocity.normalized * moveSpeed;
         }
 
@@ -154,7 +156,7 @@ public class PlayerMovement : MonoBehaviour
                 playerRb.velocity = new Vector3(limitedVel.x, playerRb.velocity.y, limitedVel.z);
             }
         }
-        
+
     }
 
     void Jump()
@@ -175,13 +177,13 @@ public class PlayerMovement : MonoBehaviour
 
     private bool Onslope()
     {
-         if(Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight *0.5f + 0.3f))
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
         {
             float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
             return angle < maxSlopeAngle && angle != 0;
         }
 
-         return false;
+        return false;
     }
 
     private Vector3 GetSlopeDirection()
@@ -189,13 +191,18 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.ProjectOnPlane(Direction, slopeHit.normal).normalized;
     }
 
+    //Respawn
 
-
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject == Floor)
+        if (other.tag == "HurtF")
         {
-            transform.position = new Vector3(0, 3, 0);
+            transform.position = respawnPoint;
+        }
+        else if (other.tag == "Spawn")
+        {
+            respawnPoint = transform.position;
         }
     }
+
 }
