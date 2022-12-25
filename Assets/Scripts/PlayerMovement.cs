@@ -122,17 +122,17 @@ public class PlayerMovement : MonoBehaviour
 
         if (Onslope() && !exitingSlope)
         {
-            playerRb.AddForce(GetSlopeDirection() * moveSpeed * 20f, ForceMode.Force);
+            playerRb.AddForce(20f * moveSpeed * GetSlopeDirection(), ForceMode.Force);
 
             if (playerRb.velocity.y > 0)
                 playerRb.AddForce(Vector3.down * 80f, ForceMode.Force);
         }
 
         if (grounded) //cuando estoy en el suelo
-            playerRb.AddForce(Direction.normalized * moveSpeed * 5f, ForceMode.Force);
+            playerRb.AddForce(5f * moveSpeed * Direction.normalized, ForceMode.Force);
 
         else if (!grounded) //cuando no estoy en el suelo
-            playerRb.AddForce(Direction.normalized * moveSpeed * 5f * airMultiplier, ForceMode.Force);
+            playerRb.AddForce(5f * airMultiplier * moveSpeed * Direction.normalized, ForceMode.Force);
 
         playerRb.useGravity = !Onslope();
 
@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
 
         else
         {
-            Vector3 flatVel = new Vector3(playerRb.velocity.x, 0f, playerRb.velocity.z);
+            Vector3 flatVel = new(playerRb.velocity.x, 0f, playerRb.velocity.z);
 
             if (flatVel.magnitude > moveSpeed)
             {
@@ -195,11 +195,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "HurtF")
+        if (other.CompareTag("HurtF"))
         {
             transform.position = respawnPoint;
         }
-        else if (other.tag == "Spawn")
+        else if (other.CompareTag("Spawn"))
         {
             respawnPoint = transform.position;
         }
